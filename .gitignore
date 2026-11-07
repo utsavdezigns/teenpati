@@ -1,0 +1,41 @@
+# ── Dependencies ──────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+.pnp/
+.pnp.js
+
+# ── Environment secrets ────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Logs ──────────────────────────────────────
+logs/
+*.log
+
+# ── Runtime / build artefacts ─────────────────
+dist/
+build/
+.cache/
+
+# ── OS files ──────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Editor & IDE ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Kiro local files ──────────────────────────
+.kiro/

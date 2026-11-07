@@ -1,0 +1,19 @@
+{
+  "name": "teen-patti",
+  "version": "1.0.0",
+  "description": "Real-time multiplayer Teen Patti card game — play with friends using a room code, no signup needed.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/handRanker.test.js"
+  },
+  "dependencies": {
+    "express": "4.18.2",
+    "socket.io": "4.7.2",
+    "uuid": "9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
