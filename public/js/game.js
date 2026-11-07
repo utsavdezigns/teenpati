@@ -106,9 +106,15 @@ window.Game = (() => {
   // ─── My Cards ─────────────────────────────────────────────────────────
   function setMyCards(cards) {
     _myCards = cards;
-    renderMyCards(cards, /* faceDown= */ false);
+    // Deal face-down — player must click "See" to reveal
+    renderMyCards(cards, /* faceDown= */ true);
   }
 
+  /**
+   * Render my cards.
+   * faceDown=true  → card backs shown (Blind state)
+   * faceDown=false → card faces shown (Seen state)
+   */
   function renderMyCards(cards, faceDown) {
     const area = document.getElementById('my-cards-area');
     area.innerHTML = '';
@@ -121,6 +127,16 @@ window.Game = (() => {
         el.style.animationDelay = `${idx * 0.15}s`;
       }
       area.appendChild(el);
+    });
+  }
+
+  /** Flip my cards face-up (called when server confirms "see") */
+  function revealMyCards() {
+    if (!_myCards) return;
+    const area = document.getElementById('my-cards-area');
+    const cardEls = area.querySelectorAll('.card');
+    cardEls.forEach((el, i) => {
+      setTimeout(() => UI.flipCard(el), i * 120);
     });
   }
 
@@ -237,8 +253,8 @@ window.Game = (() => {
         updatePot(data.pot);
         updateRoundLabel(data.roundNumber);
         hideBanner();
-        // Reset cards to face-down
-        renderMyCards(_myCards, false);
+        // New round — re-deal face-down (player is Blind again)
+        if (_myCards) renderMyCards(_myCards, true);
         break;
       }
       case 'chaal':
@@ -258,7 +274,10 @@ window.Game = (() => {
       }
       case 'playerSeen': {
         const pName = getPlayerName(data.token);
-        if (data.token !== App.myToken) {
+        if (data.token === App.myToken) {
+          // Flip MY cards face-up with animation
+          revealMyCards();
+        } else {
           UI.showToast(`${pName} looked at their cards`);
         }
         break;
@@ -384,9 +403,10 @@ window.Game = (() => {
     renderSeats(snapshot);
     updateActionButtons(snapshot);
 
-    // If game just started and I have cards, render them
+    // Render my cards: face-down if Blind, face-up if already Seen
     if (snapshot.status === 'playing' && _myCards) {
-      renderMyCards(_myCards, false);
+      const iAlreadySeen = snapshot.game && snapshot.game.seenStatus[App.myToken];
+      renderMyCards(_myCards, !iAlreadySeen);
     }
   }
 
