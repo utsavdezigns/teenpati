@@ -573,28 +573,34 @@ input::placeholder { color: var(--text-muted); }
   display: flex; justify-content: center;
   gap: 10px; padding: 8px 12px 4px;
   position: relative; z-index: 30; flex-shrink: 0;
-  perspective: 600px;
+  perspective: 800px;
 }
 .my-cards-area .card {
   width: 68px; height: 98px; border-radius: 9px;
   cursor: pointer;
   filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6));
-  transition: transform 0.25s var(--trans-spring), filter var(--trans);
+  /* transition handles both flip AND hover — but hover must not override rotateY */
+  transition: filter var(--trans);
 }
-.my-cards-area .card:hover {
+/* Hover: only lift/scale — NEVER override rotateY so face-down stays face-down */
+.my-cards-area .card:not(.face-down):hover {
   transform: translateY(-10px) scale(1.05);
   filter: drop-shadow(0 14px 26px rgba(0,0,0,0.6));
 }
+/* Flip transition for See action */
+.my-cards-area .card {
+  transition: transform 0.45s cubic-bezier(.4,0,.2,1), filter var(--trans);
+}
 
-/* Deal animation — face-down card arrives from deck */
+/* Deal animation — face-down (blind) */
 @keyframes dealCardDown {
   from { opacity: 0; transform: translate(-30vw,-20vh) scale(0.4) rotateY(180deg); }
   to   { opacity: 1; transform: rotateY(180deg); }
 }
-/* Deal animation — face-up card arrives (after See) */
+/* Deal animation — face-up (after reconnect seen) */
 @keyframes dealCardUp {
-  from { opacity: 0; transform: translate(-30vw,-20vh) scale(0.4) rotateY(0deg); }
-  to   { opacity: 1; transform: rotateY(0deg); }
+  from { opacity: 0; transform: translate(-30vw,-20vh) scale(0.4); }
+  to   { opacity: 1; transform: none; }
 }
 .card.dealing-down {
   animation: dealCardDown 0.4s cubic-bezier(.2,.8,.3,1) forwards;
