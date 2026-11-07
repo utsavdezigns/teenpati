@@ -104,17 +104,15 @@ window.Game = (() => {
   }
 
   // ─── My Cards ─────────────────────────────────────────────────────────
+  // Track whether I have already seen my cards this round
+  let _iHaveSeen = false;
+
   function setMyCards(cards) {
-    _myCards = cards;
-    // Deal face-down — player must click "See" to reveal
-    renderMyCards(cards, /* faceDown= */ true);
+    _myCards  = cards;
+    _iHaveSeen = false;          // fresh deal — always start Blind
+    renderMyCards(cards, true);  // face-down until "See" is clicked
   }
 
-  /**
-   * Render my cards.
-   * faceDown=true  → card backs shown (Blind state)
-   * faceDown=false → card faces shown (Seen state)
-   */
   function renderMyCards(cards, faceDown) {
     const area = document.getElementById('my-cards-area');
     area.innerHTML = '';
@@ -130,11 +128,16 @@ window.Game = (() => {
     });
   }
 
-  /** Flip my cards face-up (called when server confirms "see") */
+  /** Flip MY cards face-up with animation (called on playerSeen event) */
   function revealMyCards() {
-    if (!_myCards) return;
+    _iHaveSeen = true;
     const area = document.getElementById('my-cards-area');
     const cardEls = area.querySelectorAll('.card');
+    if (cardEls.length === 0 && _myCards) {
+      // Cards not rendered yet — render face-up immediately
+      renderMyCards(_myCards, false);
+      return;
+    }
     cardEls.forEach((el, i) => {
       setTimeout(() => UI.flipCard(el), i * 120);
     });
@@ -253,7 +256,8 @@ window.Game = (() => {
         updatePot(data.pot);
         updateRoundLabel(data.roundNumber);
         hideBanner();
-        // New round — re-deal face-down (player is Blind again)
+        // New round — reset seen state, keep cards face-down
+        _iHaveSeen = false;
         if (_myCards) renderMyCards(_myCards, true);
         break;
       }
@@ -403,10 +407,16 @@ window.Game = (() => {
     renderSeats(snapshot);
     updateActionButtons(snapshot);
 
-    // Render my cards: face-down if Blind, face-up if already Seen
+    // Only re-render cards if the area is empty (e.g. page refresh / reconnect).
+    // Normal play: cards are rendered once by setMyCards() and revealed by revealMyCards().
     if (snapshot.status === 'playing' && _myCards) {
-      const iAlreadySeen = snapshot.game && snapshot.game.seenStatus[App.myToken];
-      renderMyCards(_myCards, !iAlreadySeen);
+      const area = document.getElementById('my-cards-area');
+      if (area.children.length === 0) {
+        // Reconnect: restore correct face based on seen status
+        const alreadySeen = snapshot.game && snapshot.game.seenStatus[App.myToken];
+        if (alreadySeen) _iHaveSeen = true;
+        renderMyCards(_myCards, !alreadySeen);
+      }
     }
   }
 
