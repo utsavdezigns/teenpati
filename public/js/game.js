@@ -121,7 +121,8 @@ window.Game = (() => {
     cards.forEach((card, idx) => {
       const el = UI.createCardElement(card.rank, card.suit, faceDown);
       if (!UI.REDUCED_MOTION) {
-        el.classList.add('dealing');
+        // Use correct animation class so transform end-state matches face state
+        el.classList.add(faceDown ? 'dealing-down' : 'dealing-up');
         el.style.animationDelay = `${idx * 0.15}s`;
       }
       area.appendChild(el);
