@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test tests/handRanker.test.js"
+    "test": "node --test tests/handRanker.test.js tests/blindSecurity.test.js"
   },
   "dependencies": {
     "express": "4.18.2",
