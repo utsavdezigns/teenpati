@@ -22,7 +22,8 @@ function initSocket() {
 
   socket.on('connect', () => {
     console.log('Socket connected:', socket.id);
-    // If we have a stored session, try to reconnect
+    UI.setConnDot('green');
+    document.getElementById('server-waking')?.style && (document.getElementById('server-waking').style.display = 'none');
     const token = getStoredToken();
     const code  = localStorage.getItem('tp_room');
     const name  = localStorage.getItem('tp_name');
@@ -33,6 +34,11 @@ function initSocket() {
 
   socket.on('disconnect', () => {
     console.log('Socket disconnected');
+    UI.setConnDot('amber');
+  });
+
+  socket.on('connect_error', () => {
+    UI.setConnDot('red');
   });
 
   socket.on('error', ({ message }) => {
@@ -152,7 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initSocket();
 
-  // Show lobby (default)
+  // FIX #17: show waking notice after 3s if still not connected
+  setTimeout(() => {
+    const w = document.getElementById('server-waking');
+    if (w && !App.socket?.connected) w.style.display = 'block';
+  }, 3000);
+
+  // Show lobby
   UI.showScreen('screen-lobby');
   window.location.hash = '';
 });
